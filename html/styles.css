@@ -1,0 +1,278 @@
+/* css/styles.css */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    color: #FFFFFF;
+}
+
+/* HUD Styling */
+#hud {
+    position: absolute;
+    top: 50%;
+    left: 1%;
+    font-size: 18px;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 15px;
+    border-radius: 8px;
+    width: 220px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+#hud p {
+    margin: 5px 0;
+}
+
+/* AoP Display Styling */
+#aop-display {
+    position: absolute;
+    top: 95%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px;
+    color: #FFFFFF;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px 25px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+#aop-display p {
+    margin: 0;
+}
+
+/* Vote Panel Styling */
+#vote-panel {
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #FFFFFF;
+    padding: 20px;
+    border-radius: 10px;
+    width: 350px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+#vote-panel h2 {
+    margin-top: 0;
+    font-size: 24px;
+    color: #FFD700;
+}
+
+#vote-options {
+    list-style-type: none;
+    padding: 0;
+    margin: 10px 0;
+    width: 100%;
+}
+
+#vote-options li {
+    margin: 8px 0;
+}
+
+#vote-options button {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 16px;
+    color: #FFFFFF;
+    background-color: #333333;
+    border: 1px solid #FFD700;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#vote-options button:hover {
+    background-color: #FFD700;
+}
+
+button {
+    background-color: #444444;
+    color: #FFFFFF;
+    border: none;
+    padding: 8px 12px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #666666;
+}
+/* Notification for vote confirmation */
+#vote-confirmation {
+    position: absolute;
+    top: 20%;
+    left: 8.3%;
+    transform: translateX(-50%);
+    padding: 15px 30px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 18px;
+    border-radius: 5px;
+    text-align: center;
+    z-index: 1000;
+}
+/* Vote Notification Styling */
+#vote-notification {
+    position: absolute;
+    top: 5%;
+    left: 10%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #FFFFFF;
+    padding: 10px 20px;
+    border-radius: 3px;
+    font-size: 18px;
+    text-align: center;
+    width: 300px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+#register-panel {
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #FFFFFF;
+    padding: 20px;
+    border-radius: 10px;
+    width: 350px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+#register-panel h2 {
+    margin-top: 0;
+    font-size: 24px;
+    color: #FFD700;
+}
+
+#register-panel button {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 16px;
+    color: #FFFFFF;
+    background-color: #333333;
+    border: 1px solid #FFD700;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#register-panel button:hover {
+    background-color: #FFD700;
+}
+#register-panel button.button-close {
+    background-color: #444444;
+    color: #FFFFFF;
+    border: none;
+    padding: 8px 12px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+    margin-top: 10px;
+}
+
+#register-panel button.button-close:hover {
+    background-color: #666666;
+}
+
+/* General notification style */
+.notification {
+    position: absolute;
+    font-size: 18px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px 20px;
+    border: 1px solid #FFD700;
+    text-align: center;
+    width: 300px;
+    box-shadow: 0 4px 8px #FFD700;
+}
+
+/* Specific positions for each notification */
+#welcome-notification {
+    top: 5%; /* Position welcome notification higher up */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#vote-confirmation {
+    top: 15%; /* Position vote confirmation notification slightly below welcome */
+    left: 50%;
+    transform: translateX(-50%);
+}
+/* Existing styles */
+
+/* MDT Styles */
+#mdt {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.95);
+    color: #FFFFFF;
+    padding: 20px;
+    border-radius: 10px;
+    width: 600px;
+    max-height: 80%;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+#mdt h1, #mdt h2 {
+    text-align: center;
+}
+
+#mdt #search-options {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+#mdt #search-options button {
+    margin: 0 10px;
+    padding: 10px 20px;
+}
+
+#mdt .search-form {
+    margin-bottom: 20px;
+}
+
+#mdt .search-form input {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+#mdt .search-form button {
+    width: 100%;
+    padding: 10px;
+}
+
+#mdt #results {
+    margin-top: 20px;
+}
+
+#mdt #close-btn {
+    display: block;
+    margin: 20px auto 0;
+    padding: 10px 20px;
+}
+
+/* Existing styles */

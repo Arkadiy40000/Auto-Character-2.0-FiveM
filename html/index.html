@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HUD & AoP Voting</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- HUD Display -->
+    <div id="hud">
+        <p id="hud-name"></p>
+        <p id="hud-role"></p>
+        <p id="hud-address" style="display: none;"></p>
+        <p id="hud-car"></p>
+        <p id="hud-color"></p>
+        <p id="hud-plate"></p>
+        <p id="hud-division" style="display: none;"></p>
+        <p id="hud-unit" style="display: none;"></p>
+    </div>
+    
+    <!-- AoP Display -->
+    <div id="aop-display">
+        <p id="aop-text"></p>
+    </div>
+
+    <!-- Voting Notification and Panel -->
+    <div id="vote-notification" style="display: none;">
+        <p>AoP Vote Started! <span id="vote-timer"></span> seconds left. Press F3 to vote.</p>
+    </div>
+    
+    <div id="vote-panel" style="display: none;">
+        <h2>Select Area of Play</h2>
+        <ul id="vote-options"></ul>
+        <button onclick="closeVotePanel()">Close</button>
+    </div>
+    
+    <div id="welcome-notification" style="display: none;">
+        <p id="welcome-text">Welcome! Press F1 to register.</p>
+    </div>
+    
+    <!-- Vote Confirmation Notification Popup -->
+    <div id="vote-confirmation" style="display: none;">
+        <p id="vote-confirmation-text">Vote received!</p>
+    </div>
+
+    <div id="register-panel" style="display: none;">
+        <h2>Register</h2>
+        <button onclick="registerAs('civ')">Register as Civilian</button>
+        <button onclick="registerAs('cop')">Register as Cop</button>
+        <br>
+        <button class ='button-close' onclick="closeRegisterPanel()">Close</button>
+    </div>
+    <div id="mdt" style="display: none;">
+        <h1>Mobile Data Terminal</h1>
+        <div id="search-options">
+            <button onclick="showSearch('address')">Search Address</button>
+            <button onclick="showSearch('person')">Search Person</button>
+            <button onclick="showSearch('vehicle')">Search Vehicle</button>
+        </div>
+        <div id="search-forms">
+            <div id="address-search" class="search-form" style="display: none;">
+                <h2>Address Search</h2>
+                <input type="text" id="address-input" placeholder="Enter Address">
+                <button onclick="searchAddress()">Search</button>
+            </div>
+            <div id="person-search" class="search-form" style="display: none;">
+                <h2>Person Search</h2>
+                <input type="text" id="firstname-input" placeholder="First Name">
+                <input type="text" id="lastname-input" placeholder="Last Name">
+                <button onclick="searchPerson()">Search</button>
+            </div>
+            <div id="vehicle-search" class="search-form" style="display: none;">
+                <h2>Vehicle Search</h2>
+                <input type="text" id="plate-input" placeholder="License Plate">
+                <button onclick="searchVehicle()">Search</button>
+            </div>
+        </div>
+        <div id="results">
+        </div>
+        <button id="close-btn" onclick="closeMDT()">Close MDT</button>
+    </div>
+
+
+    <script>
+        // Listener for NUI messages
+        window.addEventListener('message', function(event) {
+            const data = event.data;
+
+            if (data.action === 'updateHud') {
+                // Update HUD data
+                document.getElementById('hud-name').innerText = `Name: ${data.data.name}`;
+                document.getElementById('hud-role').innerText = `Role: ${data.data.role}`;
+                document.getElementById('hud-car').innerText = `Vehicle: ${data.data.car}`;
+                document.getElementById('hud-color').innerText = `Color: ${data.data.color}`;
+                document.getElementById('hud-plate').innerText = `Plate: ${data.data.plate}`;
+                
+                if (data.data.role === 'civ') {
+                    document.getElementById('hud-address').style.display = 'block';
+                    document.getElementById('hud-address').innerText = `Address: ${data.data.address}`;
+                    document.getElementById('hud-division').style.display = 'none';
+                    document.getElementById('hud-unit').style.display = 'none';
+                } else if (data.data.role === 'cop') {
+                    document.getElementById('hud-division').style.display = 'block';
+                    document.getElementById('hud-unit').style.display = 'block';
+                    document.getElementById('hud-division').innerText = `Division: ${data.data.division}`;
+                    document.getElementById('hud-unit').innerText = `Unit: ${data.data.unit}`;
+                    document.getElementById('hud-address').style.display = 'none';
+                }
+
+                document.getElementById('aop-text').innerText = `Current AoP: ${data.data.aop}`;
+            }
+
+            else if (data.action === 'toggleHUD') {
+                document.getElementById('hud').style.display = data.show ? 'block' : 'none';
+                document.getElementById('aop-display').style.display = data.show ? 'block' : 'none';
+            }
+
+            else if (data.action === 'startVote') {
+                document.getElementById('vote-notification').style.display = 'block';
+                document.getElementById('vote-timer').innerText = data.duration;
+                const optionsList = document.getElementById('vote-options');
+                optionsList.innerHTML = '';
+                data.options.forEach((option, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `<button onclick="submitVote(${index + 1}, '${option}')">${option}</button>`;
+                    optionsList.appendChild(listItem);
+                });
+
+                // Countdown timer
+                let timer = data.duration;
+                const interval = setInterval(() => {
+                    timer--;
+                    document.getElementById('vote-timer').innerText = timer;
+                    if (timer <= 0) {
+                        clearInterval(interval);
+                        document.getElementById('vote-notification').style.display = 'none';
+                    }
+                }, 1000);
+            }
+
+            else if (data.action === 'displayAoPResult') {
+                document.getElementById('aop-text').innerText = `Current AoP: ${data.result}`;
+            }
+
+            else if (data.action === 'toggleVotePanel') {
+                document.getElementById('vote-panel').style.display = data.show ? 'block' : 'none';
+            }
+            else if (data.action === 'displayNotification') {
+                const confirmationText = document.getElementById('vote-confirmation-text');
+                confirmationText.innerText = data.message;
+                const confirmationPopup = document.getElementById('vote-confirmation');
+                confirmationPopup.style.display = 'block';
+
+                setTimeout(() => {
+                    confirmationPopup.style.display = 'none';
+                }, 3000); // Hide after 3 seconds
+            }
+            
+            // Show or hide the registration panel
+            else if (data.action === 'toggleRegisterPanel') {
+                document.getElementById('register-panel').style.display = data.show ? 'block' : 'none';
+            }
+            else if (data.action === 'displayWelcomeNotification') {
+                const notificationText = document.getElementById('welcome-text');
+                notificationText.innerText = data.message;
+                const notificationPopup = document.getElementById('welcome-notification');
+                notificationPopup.style.display = 'block';
+
+                setTimeout(() => {
+                    notificationPopup.style.display = 'none';
+                }, 5000); // Hide after 5 seconds
+            }
+        });
+
+        // Open voting panel
+        function openVotePanel() {
+            document.getElementById('vote-panel').style.display = 'block';
+            document.getElementById('vote-notification').style.display = 'none';
+        }
+
+        // Close voting panel
+        function closeVotePanel() {
+            fetch(`https://${GetParentResourceName()}/closeVotePanel`, { method: 'POST' });
+            document.getElementById('vote-panel').style.display = 'none';
+        }
+
+        // Submit vote choice
+        function submitVote(choice, option) {
+            fetch(`https://${GetParentResourceName()}/submitVote`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ choice })
+            }).then(() => {
+                displayConfirmation(`You voted for: ${option}`);
+                closeVotePanel();
+            });
+        }
+
+        // Display confirmation notification
+        function displayConfirmation(message) {
+            const confirmationText = document.getElementById('vote-confirmation-text');
+            confirmationText.innerText = message;
+            const confirmationPopup = document.getElementById('vote-confirmation');
+            confirmationPopup.style.display = 'block';
+
+            setTimeout(() => {
+                confirmationPopup.style.display = 'none';
+            }, 3000); // Hide after 3 seconds
+        }
+        function registerAs(role) {
+            fetch(`https://${GetParentResourceName()}/registerAs`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role: role })
+            });
+        }
+        function registerAs(role) {
+            fetch(`https://${GetParentResourceName()}/registerAs`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role: role })
+            });
+        }
+        function closeRegisterPanel() {
+            fetch(`https://${GetParentResourceName()}/closeRegisterPanel`, { method: 'POST' });
+            document.getElementById('register-panel').style.display = 'none';
+        }
+        function submitVote(choice, option) {
+            fetch(`https://${GetParentResourceName()}/submitVote`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ choice: choice }) // Ensure 'choice' is sent correctly
+            }).then(() => {
+                displayConfirmation(`You voted for: ${option}`);
+                closeVotePanel();
+            });
+        }
+        function showSearch(type) {
+            document.querySelectorAll('.search-form').forEach(form => form.style.display = 'none');
+            document.getElementById(type + '-search').style.display = 'block';
+        }
+
+        function searchAddress() {
+            const address = document.getElementById('address-input').value;
+            fetch(`https://${GetParentResourceName()}/searchAddress`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ address: address })
+            });
+        }
+
+        function searchPerson() {
+            const firstname = document.getElementById('firstname-input').value;
+            const lastname = document.getElementById('lastname-input').value;
+            fetch(`https://${GetParentResourceName()}/searchPerson`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ firstname: firstname, lastname: lastname })
+            });
+        }
+
+        function searchVehicle() {
+            const plate = document.getElementById('plate-input').value;
+            fetch(`https://${GetParentResourceName()}/searchVehicle`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ plate: plate })
+            });
+        }
+
+        function closeMDT() {
+            fetch(`https://${GetParentResourceName()}/closeMDT`, { method: 'POST' });
+            document.getElementById('mdt').style.display = 'none';
+            document.getElementById('results').innerHTML = '';
+            SetNuiFocus(false, false);
+        }
+
+        window.addEventListener('message', function(event) {
+            const data = event.data;
+            if (data.action === 'openMDT') {
+                document.getElementById('mdt').style.display = 'block';
+            } else if (data.action === 'showResults') {
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '';
+                if (data.data.type === 'person' && data.data.results) {
+                    const person = data.data.results;
+                    let resultHTML = `<h2>Person Information</h2>`;
+                    // Existing code for displaying mugshot, if any...
+
+                    resultHTML += `<p>Name: ${person.name} ${person.surname}</p>`;
+                    resultHTML += `<p>Address: ${person.address}</p>`;
+                    resultHTML += `<p>Vehicle: ${person.car}</p>`;
+                    resultHTML += `<p>Color: ${person.color}</p>`;
+                    resultHTML += `<p>Plate: ${person.plate}</p>`;
+
+                    // Display notes
+                    resultHTML += `<h3>Notes:</h3>`;
+                    resultHTML += `<pre>${person.notes || 'No notes available.'}</pre>`;
+
+                    // Add a textarea for adding new notes
+                    resultHTML += `<textarea id="new-note" placeholder="Enter new note here..." rows="4" cols="50"></textarea>`;
+                    resultHTML += `<button onclick="addNote(${person.id})">Add Note</button>`;
+
+                    // Add a button to clear notes
+                    resultHTML += `<button onclick="clearNotes(${person.id})">Clear Notes</button>`;
+
+                    resultsDiv.innerHTML = resultHTML;
+                } else if (data.data.type === 'address' && data.data.results.length > 0) {
+                    let resultHTML = `<h2>Address Information</h2>`;
+                    data.data.results.forEach(person => {
+                        resultHTML += `<p>Name: ${person.name} ${person.surname}</p>`;
+                    });
+                    resultsDiv.innerHTML = resultHTML;
+                } else if (data.data.type === 'vehicle' && data.data.results) {
+                    const vehicle = data.data.results;
+                    let resultHTML = `<h2>Vehicle Information</h2>`;
+                    resultHTML += `<p>Owner: ${vehicle.name} ${vehicle.surname}</p>`;
+                    resultHTML += `<p>Vehicle: ${vehicle.car}</p>`;
+                    resultHTML += `<p>Color: ${vehicle.color}</p>`;
+                    resultHTML += `<p>Plate: ${vehicle.plate}</p>`;
+                    resultsDiv.innerHTML = resultHTML;
+                } else {
+                    resultsDiv.innerHTML = `<p>No results found.</p>`;
+                }
+            }
+        });
+        function addNote(targetId) {
+            const note = document.getElementById('new-note').value;
+            if (note.trim() === '') {
+                alert('Please enter a note.');
+                return;
+            }
+            fetch(`https://${GetParentResourceName()}/addNote`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ targetId: targetId, note: note })
+            });
+            // Clear the textarea
+            document.getElementById('new-note').value = '';
+        }
+
+        function clearNotes(targetId) {
+                fetch(`https://${GetParentResourceName()}/clearNotes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ targetId: targetId })
+                });
+            
+        }
+        
+    </script>
+</body>
+</html>
